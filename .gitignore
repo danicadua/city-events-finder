@@ -215,6 +215,9 @@ tempCodeRunnerFile.py
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+.env
+*.key
+*.json.key
 
 # Streamlit
 .streamlit/secrets.toml
