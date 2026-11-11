@@ -19,4 +19,6 @@ RUN chown -R appuser:appgroup /app
 USER appuser
 ENV PATH=/home/appuser/.local/bin:$PATH
 
-CMD ["python", "main.py"]
+# Cloud Run sends traffic to the port in $PORT (8080 by default).
+# gunicorn is a production web server; "app:app" = the Flask app in app.py.
+CMD exec gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 1 --threads 8 app:app

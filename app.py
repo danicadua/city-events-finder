@@ -9,6 +9,7 @@ import logging
 import os
 
 from dotenv import load_dotenv
+import requests
 from flask import Flask, jsonify, render_template, request
 
 load_dotenv()  # reads .env locally; on Cloud Run the keys come from Secret Manager
@@ -23,6 +24,15 @@ EVENT_SOURCES = {
     "Ticketmaster": ticketmaster.get_events,
     "SeatGeek": seatgeek.get_events,
 }
+
+
+def safe_error(exc):
+    """Describe an error without the request URL, which contains the API key."""
+    if isinstance(exc, requests.HTTPError) and exc.response is not None:
+        return f"HTTP {exc.response.status_code} {exc.response.reason}"
+    if isinstance(exc, KeyError):
+        return f"missing setting {exc} in .env"
+    return type(exc).__name__
 
 
 def parse_city(text):
@@ -53,13 +63,13 @@ def events():
         try:
             results.append(fetch(city, state))
         except Exception as exc:  # one source failing shouldn't break the page
-            logging.error("%s failed: %s", name, exc)
+            logging.error("%s failed: %s", name, safe_error(exc))
             errors.append(name)
 
     try:
         forecast = weather.get_forecast(city, state)
     except Exception as exc:
-        logging.error("Open-Meteo failed: %s", exc)
+        logging.error("Open-Meteo failed: %s", safe_error(exc))
         forecast = {}
         errors.append("Open-Meteo")
 
