@@ -53,13 +53,13 @@ def events():
         try:
             results.append(fetch(city, state))
         except Exception as exc:  # one source failing shouldn't break the page
-            logging.error("%s failed: %s", name, safe_error(exc))
+            logging.error("%s failed: %s", name, exc)
             errors.append(name)
 
     try:
         forecast = weather.get_forecast(city, state)
     except Exception as exc:
-        logging.error("Open-Meteo failed: %s", safe_error(exc))
+        logging.error("Open-Meteo failed: %s", exc)
         forecast = {}
         errors.append("Open-Meteo")
 
